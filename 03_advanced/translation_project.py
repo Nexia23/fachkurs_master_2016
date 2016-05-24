@@ -1,7 +1,7 @@
 import random
 import sys
 
-class BioMolecule():
+class BioMolecule(object):
     """
     A generic molecule that has basic attributes like id, name and
     mass.
@@ -14,7 +14,39 @@ class BioMolecule():
         self.id = id
         self.name = name
         self.mass = mass
+    @property
+    def id(self):
+        return self._id
 
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def mass(self):
+        return self._mass
+
+    @id.setter
+    def id(self, value) :
+        if not isinstance(value, int):
+            raise TypeError("Mass must be Integer.")
+        self._id = value
+
+    @name.setter
+    def name(self, value) :
+        if not isinstance(value, str):
+            raise TypeError("Mass must be String.")
+        self._name = value
+
+    @mass.setter
+    def mass(self, value):
+        if not isinstance(value, float):
+            raise TypeError("Mass must be Float.")
+        self._mass = value
+
+
+    
+    
     # 1. Write setter and getter methods for all attributes.
     #    Use @property decorators as dicussed in the lecture
     # 2. In the setter methods check for the type of each attribute.
@@ -31,7 +63,18 @@ class Polymer(BioMolecule):
     """
     def __init__(self, id, name, sequence, mass=0.):
         # 3. Initialize the parent class correctly
-        self.sequence = sequence
+        super().__init__( id, name, mass)
+        self._sequence = sequence
+
+    @property
+    def sequence(self):
+        return self._sequence
+
+    @sequence.setter
+    def sequence(self, value) :
+        if not isinstance(value, str):
+            raise TypeError("Mass must be String.")
+        self._sequence = value
 
     
     # 4. Write getter and setter for sequence, again check for type
@@ -39,7 +82,7 @@ class Polymer(BioMolecule):
     def __getitem__(self, value):
         """
         Makes the sequence accessible via the indexing operators:
-        p[10] returns the tenth character in the sequence.
+<        p[10] returns the tenth character in the sequence.
         """
         return self.sequence[value]
 
@@ -47,9 +90,7 @@ class Polymer(BioMolecule):
         """
          Enables changing of sequence characters via the indexing operators.       
         """
-        tmp = list(sequence)
-        tmp[key] = value
-        self.sequence = "".join(tmp)
+        self.sequence[key] = value
 
 
 class MRNA(Polymer):
@@ -75,6 +116,8 @@ class Protein(Polymer):
     >> protein.sequence
     MVFTA
 
+    
+    
     """
     number_of_proteins = 0  # init instance counter
 
@@ -163,7 +206,7 @@ class Ribosome(BioMolecule):
         return self.nascent_prot
         
 
-class Cell:
+class Cell(object):
     def __init__(self):
         self.ribosomes = [Ribosome(i, 'Ribo_{0}'.format(i)) for i in range(200)]
         self.mrnas = [MRNA(i, 'MRNA_{0}'.format(i), "UUUUUUUUUUAA") for i in range(20)]
