@@ -41,6 +41,7 @@ class BioMolecule(object):
     @mass.setter
     def mass(self, value):
         if not isinstance(value, float):
+            print(value)
             raise TypeError("Mass must be Float.")
         self._mass = value
 
@@ -96,13 +97,24 @@ class Polymer(BioMolecule):
 class MRNA(Polymer):
     def __init__(self, id, name, sequence, mass=0.):
         # 6. Initialize the parent class correctly
-
+        super().__init__( id, name, sequence, mass)
+     
         # 7. Create a list that stores if a ribosome is bound for each
         # codon (triplet).
-        self.binding = [] # use this attribute for 7.
+        bond_rib= len(sequence)//3
+        self.binding = [0]*bond_rib # use this attribute for 7.
+        self.mass = self.calculate_mass()
 
     def calculate_mass(self):
         NA_mass = {'A': 1.0, 'U': 2.2, 'G':2.1, 'C':1.3}
+        self.mass = 0.
+
+        for base in self.sequence:
+            self.mass += NA_mass[base] 
+
+        return self.mass    
+
+
         # 8. calculate the mass for the whole sequence
 
 class Protein(Polymer):
@@ -124,8 +136,12 @@ class Protein(Polymer):
     def __init__(self, id, name, sequence, mass=0.):
         super().__init__(id, name, sequence, mass)
         self.__class__.number_of_proteins += 1 #  increase instance counter
-        self.mass = self.calculate_mass()
+        self.calculate_mass()
+        
 
+    def __add__(self, other):
+        self.sequence = self.sequence + other
+        return self
     # 9. implement the elongation feature described in the docstring. (__add__)
 
     def calculate_mass(self):
@@ -133,8 +149,10 @@ class Protein(Polymer):
                     "E": 146.121, "G": 75.0664, "H":155.154, "I":131.172, "L": 131.172, "K": 147.195,
                     "M": 149.211, "F": 165.189, "P": 115.13, "S": 105.092, "T": 119.119, "W": 204.225,
                     "Y":181.188, "V":117.146}
+        self.mass = 0.
         for aa in self.sequence:
             self.mass += AA_mass[aa]
+        
    
 
 class Ribosome(BioMolecule):
@@ -177,14 +195,14 @@ class Ribosome(BioMolecule):
 
         @type mrna: MRNA
         """
-        if not self.bound_mrna and not mrna.binding[0]:  # no mrna bound
+        if not self.bound_mrna and mrna.binding[0]==0:  # no mrna bound
                                                     # yet and target
                                                     # mrna still free
                                                     # at pos 0
             self.bound_mrna = mrna
-            self.nascent_prot = None  # 10. Instantiate a new Protein
+            self.nascent_prot = Protein(mrna.id, 'Product','')  # 10. Instantiate a new Protein
             self.position = 0
-            self.bound_mrna.binding  # 11. Mark position 0 of MRNA to be bound by ribosome
+            self.bound_mrna.binding[0]=1  # 11. Mark position 0 of MRNA to be bound by ribosome
             
     def elongate(self):
         """Elongate the new protein by the correct amino acid. Check if an
@@ -196,12 +214,38 @@ class Ribosome(BioMolecule):
         if not self.bound_mrna: # can't elongate because there is no MRNA
             return False
 
+        if self.bound_mrna.binding[1]==1:
+            return False
+
+        if self.bound_mrna.binding[0]==1:
+            
+            self.nascent_prot + self.code[self.bound_mrna.sequence[0:3]]
+            i=1
+
+            while self.bound_mrna.binding[i]!= 1:
+
+                self.bound_mrna.binding[i-1] = 0
+                self.bound_mrna.binding[i] = 1
+                seq_i = i*3
+                seq_o = seq_i+3
+                self.nascent_prot + self.code[self.bound_mrna.sequence[seq_i:seq_o]]
+                
+                if self.code[self.bound_mrna.sequence[seq_i:seq_o]]== '*':
+                    self.terminate()
+                    break
+
+                i = i+1
+
+        return self.nascent_prot
         # 12. Implement the described features.
 
     def terminate(self):
         """
         Splits the ribosome/MRNA complex and returns a protein.
+
         """
+        if self.nascent_prot.sequence[-1]=='*':
+            self.bound_mrna.binding[-1] = 0
         # 13. Dissociate the complex.
         return self.nascent_prot
         
@@ -226,10 +270,18 @@ class Cell(object):
             self.step()
             if p:
                 print([len(x) for x in self.proteins])
+
             
 if __name__ == "__main__":  # the following is called if the module is executed
     # 14. Instantiate the Cell class and call the simulation method.
-    pass
+    test = Cell()
+    test.simulate(10)
+    
+    mr= MRNA(1, 'asd' ,'GGUAAUUAGG')
+    r =Ribosome(23, 'test')
+    r.initiate(mr)
+    p=r.elongate()
+    print(p.sequence)
 
 # 15. Generate a set of mRNA sequences to initiate the cell.
 # 16. Implement protein degradation.
