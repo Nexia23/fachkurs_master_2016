@@ -91,7 +91,13 @@ class Polymer(BioMolecule):
         """
          Enables changing of sequence characters via the indexing operators.       
         """
+<<<<<<< HEAD
         self.sequence[key] = value
+=======
+        tmp = list(self.sequence)
+        tmp[key] = value
+        self.sequence = "".join(tmp)
+>>>>>>> 5b61b7adf41f90b6fc13c4e905fc49fc3ff06360
 
 
 class MRNA(Polymer):
@@ -137,7 +143,10 @@ class Protein(Polymer):
         super().__init__(id, name, sequence, mass)
         self.__class__.number_of_proteins += 1 #  increase instance counter
         self.calculate_mass()
+<<<<<<< HEAD
         
+=======
+>>>>>>> 5b61b7adf41f90b6fc13c4e905fc49fc3ff06360
 
     def __add__(self, other):
         self.sequence = self.sequence + other
