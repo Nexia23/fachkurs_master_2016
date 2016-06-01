@@ -91,13 +91,7 @@ class Polymer(BioMolecule):
         """
          Enables changing of sequence characters via the indexing operators.       
         """
-<<<<<<< HEAD
         self.sequence[key] = value
-=======
-        tmp = list(self.sequence)
-        tmp[key] = value
-        self.sequence = "".join(tmp)
->>>>>>> 5b61b7adf41f90b6fc13c4e905fc49fc3ff06360
 
 
 class MRNA(Polymer):
@@ -143,10 +137,7 @@ class Protein(Polymer):
         super().__init__(id, name, sequence, mass)
         self.__class__.number_of_proteins += 1 #  increase instance counter
         self.calculate_mass()
-<<<<<<< HEAD
         
-=======
->>>>>>> 5b61b7adf41f90b6fc13c4e905fc49fc3ff06360
 
     def __add__(self, other):
         self.sequence = self.sequence + other
@@ -240,12 +231,12 @@ class Ribosome(BioMolecule):
                 self.nascent_prot + self.code[self.bound_mrna.sequence[seq_i:seq_o]]
                 
                 if self.code[self.bound_mrna.sequence[seq_i:seq_o]]== '*':
-                    self.terminate()
-                    break
+                    return self.terminate()
+                
 
                 i = i+1
 
-        return self.nascent_prot
+        return 0
         # 12. Implement the described features.
 
     def terminate(self):
@@ -286,11 +277,6 @@ if __name__ == "__main__":  # the following is called if the module is executed
     test = Cell()
     test.simulate(10)
     
-    mr= MRNA(1, 'asd' ,'GGUAAUUAGG')
-    r =Ribosome(23, 'test')
-    r.initiate(mr)
-    p=r.elongate()
-    print(p.sequence)
-
+    
 # 15. Generate a set of mRNA sequences to initiate the cell.
 # 16. Implement protein degradation.
